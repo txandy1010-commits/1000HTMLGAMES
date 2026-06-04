@@ -1,59 +1,130 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="width=device-width, initial-scale=1.0">
-    <title>HTML Games</title>
+    <title>Retro Cookie Clicker</title>
+    <style>
+        /* Retro Arcade Styling */
+        body {
+            background-color: #111;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        a {
+            color: #00ffff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #game-container {
+            border: 4px dashed #00ff66;
+            background-color: #222;
+            padding: 30px;
+            display: inline-block;
+            border-radius: 15px;
+            box-shadow: 0 0 15px #00ff66;
+            margin-top: 20px;
+        }
+
+        /* Oversized interactive cookie element */
+        #cookie-btn {
+            font-size: 80px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            transition: transform 0.05s ease;
+            user-select: none;
+            padding: 10px;
+        }
+        #cookie-btn:active {
+            transform: scale(0.90);
+        }
+
+        button {
+            background-color: #00ff66;
+            color: #000;
+            border: 2px solid #fff;
+            padding: 10px 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #fff;
+            color: #000;
+        }
+    </style>
 </head>
 <body>
     <a href="index.html">&larr; Back to Home Page</a>
     <br><br>
 
-    <button id="start-game-btn" onclick="revealGame()" style="padding: 15px 30px; font-size: 18px;">
-       Click to Play Cookie Clicker (My Version)
-    </button> 
-<!-- def use css to make the stuff look cooler maybe a retro game style? maybe make button bigger?????? -->
-    <div id="game-container" style="display: none; margin-top: 20px;">
-        <h2>Cookie Clicker</h2>
+    <div id="game-container">
+        <h2>COOKIE CLICKER</h2>
         <p>Click the cookie to earn cookies!</p>
-        <button id="cookie-btn" style="padding: 20px 40px; font-size: 24px;">🍪</button> 
-        <p>Cookies: <span id="cookie-count">0</span></p>
-        <br><br>
-        <button id="upgrade-btn" style="padding: 10px;">Buy Upgrade (Cost: <span id="upgrade-cost">15</span>)</button>
+        
+        <button id="cookie-btn">🍪</button> 
+        
+        <p style="font-size: 20px; font-weight: bold;">Cookies: <span id="cookie-count">0</span></p>
+        <br>
+        <button id="upgrade-btn">Buy Upgrade (Cost: <span id="upgrade-cost">15</span>)</button>
         <p>Current Click Power: <span id="click-power">1</span></p>
     </div>
 
     <script>
-        let cookieCount = 0; // maybe secret code to set cookie to inf? and maybe a less powerfull one I can show people who want to cheat?
-let clickPower = 1;
-let upgradeCost = 15;
+        let cookieCount = 0;
+        let clickPower = 1;
+        let upgradeCost = 15;
+        let clicksThisSecond = 0;
+        const MAX_HUMAN_CPS = 15; 
 
-function revealGame() {
-    document.getElementById('game-container').style.display = 'block';
-    document.getElementById('start-game-btn').style.display = 'none';
-}
+        // Reset the click counter every 1 second
+        setInterval(() => {
+            clicksThisSecond = 0;
+        }, 1000);
 
+        // COOKIE CLICK LISTENER (Handles Anti-Cheat and Score Logic together)
+        document.getElementById('cookie-btn').addEventListener('click', () => {
+            clicksThisSecond++;
 
-document.getElementById('cookie-btn').addEventListener('click', () => {
-    cookieCount += clickPower; 
-    document.getElementById('cookie-count').textContent = cookieCount;
-}); 
+            // Check if the speed exceeds human capabilities
+            if (clicksThisSecond > MAX_HUMAN_CPS) {
+                // Infinite alert loop to lock execution out
+                while (true) {
+                    alert("Did you really think you can cheat? you just lost all of your progress buddy refresh the page")
+                }
+            }
 
+            // Normal game execution path
+            cookieCount += clickPower; 
+            document.getElementById('cookie-count').textContent = cookieCount;
+        }); 
 
-document.getElementById('upgrade-btn').addEventListener('click', () => {
-    if (cookieCount >= upgradeCost) {
-        cookieCount -= upgradeCost;
-        clickPower += 1;
-        upgradeCost = Math.floor(upgradeCost * 1.5);
-        
-        document.getElementById('cookie-count').textContent = cookieCount;
-        document.getElementById('upgrade-cost').textContent = upgradeCost;
-        document.getElementById('click-power').textContent = clickPower;
-    } else {
-        alert("Not enough cookies!"); //maybe add an alert loop if the player is usng an auto clicker?
-    }
-});
- </script>
-</body> </html>
+        // UPGRADE CLICK LISTENER
+        document.getElementById('upgrade-btn').addEventListener('click', () => {
+            if (cookieCount >= upgradeCost) {
+                cookieCount -= upgradeCost;
+                clickPower += 1;
+                upgradeCost = Math.floor(upgradeCost * 1.5);
+                
+                document.getElementById('cookie-count').textContent = cookieCount;
+                document.getElementById('upgrade-cost').textContent = upgradeCost;
+                document.getElementById('click-power').textContent = clickPower;
+            } else {
+                alert("Not enough cookies!");
+            }
+        });
+    </script>
+</body>
+</html>

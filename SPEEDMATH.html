@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Global Speed Math Arcade</title>
+</head>
+<body style="text-align: center; font-family: sans-serif; margin-top: 30px;">
+
+    <a href="Index.html">&larr; Back Home</a>
+    <h2>Global Speed Math</h2>
+
+    <div>
+        <button onclick="setDifficulty(10)">Easy</button>
+        <button onclick="setDifficulty(50)">Medium</button>
+        <button onclick="setDifficulty(100)">Hard</button>
+    </div>
+
+    <p style="color: red; font-weight: bold; font-size: 24px;">Time Left: <span id="timer">5</span>s</p>
+    <h1><span id="num1">5</span> + <span id="num2">7</span> = ?</h1>
+
+    <input type="number" id="answer" style="font-size: 20px; width: 80px; text-align: center;">
+    <button onclick="checkAnswer()" style="font-size: 20px;">Go</button>
+
+    <p style="font-size: 18px; font-weight: bold;">Your Current Score: <span id="score">0</span></p>
+    
+    <hr style="width: 300px; margin: 20px auto;">
+    
+    <div style="max-width: 300px; margin: 0 auto; text-align: left; border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
+        <h3 style="text-align: center; margin-top: 0;">🌐 Global Top 10 Leaderboard</h3>
+        <ol id="leaderboard-list">
+            <li>Loading global scores...</li>
+        </ol>
+    </div>
+
+    <script src="https://unpkg.com/lootlocker-js-sdk/dist/lootlocker.js"></script>
+    
+    <script>
+        // --- 1. CONFIGURATION ---
+        const GAME_API_KEY = "dev_7565c7e257234f52ac5c76b1e86c7573"; 
+        const LEADERBOARD_ID = "speed";
+
+        let n1, n2, score = 0, timeLeft = 5, timer, maxRange = 10;
+
+        // FIX 1: Properly pass an empty identifier string for guest sessions to kick off tracking
+        LootLocker.initialize(GAME_API_KEY, "0.0.0.1", "development");
+        
+        LootLocker.startGuestSession("", (response) => {
+            if (response.success) {
+                console.log("Connected to LootLocker!");
+                fetchGlobalLeaderboard();
+            } else {
+                document.getElementById("leaderboard-list").innerHTML = "<li>Unable to connect to database.</li>";
+            }
+        });
+
+        nextQuestion();
+        startTimer();
+
+        // --- 2. GAME MECHANICS ---
+        function setDifficulty(range) {
+            maxRange = range;
+            score = 0;
+            document.getElementById("score").textContent = score;
+            nextQuestion();
+            startTimer();
+        }
+
+        function nextQuestion() {
+            n1 = Math.floor(Math.random() * maxRange) + 1;
+            n2 = Math.floor(Math.random() * maxRange) + 1;
+            document.getElementById("num1").textContent = n1;
+            document.getElementById("num2").textContent = n2;
+            document.getElementById("answer").value = ""; 
+        }
+
+        function startTimer() {
+            clearInterval(timer); 
+            timeLeft = 5; 
+            document.getElementById("timer").textContent = timeLeft;
+
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    handleGameOver();
+                }
+            }, 1000);
+        }
+
+        function checkAnswer() {
+            let userAnswer = parseInt(document.getElementById("answer").value);
+            if (userAnswer === (n1 + n2)) {
+                score++;
+                document.getElementById("score").textContent = score;
+                nextQuestion();
+                startTimer(); 
+            } else {
+                clearInterval(timer);
+                handleGameOver();
+            }
+        }
+
+        // --- 3. DATABASE CALLS ---
+        function handleGameOver() {
+            alert("Game over! Final Score: " + score);
+            
+            if (score > 0) {
+                let name = prompt("You made the board! Enter your name:");
+                if (name) {
+                    // FIX 2: Correct function structure for updating player profile names
+                    LootLocker.setPlayerName({ name: name }, (nameResponse) => {
+                        if (nameResponse.success) {
+                            // FIX 3: Submitting scores to LootLocker requires formatting parameters inside an object structure
+                            LootLocker.submitScore({ leaderboardKey: LEADERBOARD_ID, score: score }, (submitResponse) => {
+                                fetchGlobalLeaderboard(); // Update display
+                            });
+                        } else {
+                            // Fallback score submission if name setup experiences lag
+                            LootLocker.submitScore({ leaderboardKey: LEADERBOARD_ID, score: score }, () => {
+                                fetchGlobalLeaderboard();
+                            });
+                        }
+                    });
+                }
+            }
+            
+            score = 0;
+            document.getElementById("score").textContent = score;
+            nextQuestion();
+            startTimer();
+        }
+
+        function fetchGlobalLeaderboard() {
+            // FIX 4: Getting rankings requires passing parameters cleanly as a collection item
+            LootLocker.getLeaderboard({ leaderboardKey: LEADERBOARD_ID, count: 10 }, (response) => {
+                const list = document.getElementById("leaderboard-list");
+                list.innerHTML = ""; 
+                
+                if (response.success && response.items && response.items.length > 0) {
+                    response.items.forEach(item => {
+                        // Check if player details or names exist on the database records
+                        let name = "Anonymous";
+                        if (item.player && item.player.name) {
+                            name = item.player.name;
+                        }
+                        
+                        let row = document.createElement("li");
+                        row.innerHTML = `<b>${name}</b> - ${item.score} pts`;
+                        list.appendChild(row);
+                    });
+                } else {
+                    list.innerHTML = "<li>No global high scores yet!</li>";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
