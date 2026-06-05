@@ -137,121 +137,127 @@
     
     <script>
         // --- 1. CONFIGURATION ---
-        const GAME_API_KEY = "dev_7565c7e257234f52ac5c76b1e86c7573"; 
-        const LEADERBOARD_ID = "high";
+const GAME_API_KEY = "dev_7565c7e257234f52ac5c76b1e86c7573"; 
+const LEADERBOARD_ID = "high"; // Your alphanumeric dashboard Key
 
-        let n1, n2, score = 0, timeLeft = 5, timer, maxRange = 10;
+let n1, n2, score = 0, timeLeft = 5, timer, maxRange = 10;
 
-        // Initialize connection to database
-        LootLocker.initialize(GAME_API_KEY, "0.0.0.1", "stage");
-        
-        LootLocker.startGuestSession("", (response) => {
-            if (response.success) {
-                console.log("Connected to LootLocker!");
-                fetchGlobalLeaderboard();
-            } else {
-                document.getElementById("leaderboard-list").innerHTML = "<li>Unable to connect to database.</li>";
-            }
-        });
+window.onload = function() {
+    // 1. Initialize using your dev key pointed to development sandbox paths
+    LootLocker.initialize(GAME_API_KEY, "0.0.0.1", "development");
+    
+    // FIX: Generate a random local storage tracking key so the Guest Session doesn't crash on GitHub Pages
+    let playerIdentifier = localStorage.getItem("lootlocker_player_id");
+    if (!playerIdentifier) {
+        playerIdentifier = "player_" + Math.floor(Math.random() * 999999);
+        localStorage.setItem("lootlocker_player_id", playerIdentifier);
+    }
+    
+    // 2. Start guest session with our generated verification tracker identifier
+    LootLocker.startGuestSession(playerIdentifier, (response) => {
+        if (response.success) {
+            console.log("Connected to LootLocker successfully!");
+            fetchGlobalLeaderboard();
+        } else {
+            console.error("LootLocker connection fault:", response);
+            document.getElementById("leaderboard-list").innerHTML = 
+                "<li>Connection failed. Check if Guest Login is enabled in Settings.</li>";
+        }
+    });
 
+    nextQuestion();
+    startTimer();
+};
+
+// --- 2. GAME MECHANICS ---
+function setDifficulty(range) {
+    maxRange = range;
+    score = 0;
+    document.getElementById("score").textContent = score;
+    nextQuestion();
+    startTimer();
+}
+
+function nextQuestion() {
+    n1 = Math.floor(Math.random() * maxRange) + 1;
+    n2 = Math.floor(Math.random() * maxRange) + 1;
+    document.getElementById("num1").textContent = n1;
+    document.getElementById("num2").textContent = n2;
+    document.getElementById("answer").value = ""; 
+    document.getElementById("answer").focus();
+}
+
+function startTimer() {
+    clearInterval(timer); 
+    timeLeft = 5; 
+    document.getElementById("timer").textContent = timeLeft;
+
+    timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            handleGameOver();
+        }
+    }, 1000);
+}
+
+function checkAnswer() {
+    let userAnswer = parseInt(document.getElementById("answer").value);
+    if (userAnswer === (n1 + n2)) {
+        score++;
+        document.getElementById("score").textContent = score;
         nextQuestion();
-        startTimer();
+        startTimer(); 
+    } else {
+        clearInterval(timer);
+        handleGameOver();
+    }
+}
 
-        // --- 2. GAME MECHANICS ---
-        function setDifficulty(range) {
-            maxRange = range;
-            score = 0;
-            document.getElementById("score").textContent = score;
-            nextQuestion();
-            startTimer();
-        }
-
-        function nextQuestion() {
-            n1 = Math.floor(Math.random() * maxRange) + 1;
-            n2 = Math.floor(Math.random() * maxRange) + 1;
-            document.getElementById("num1").textContent = n1;
-            document.getElementById("num2").textContent = n2;
-            document.getElementById("answer").value = ""; 
-            document.getElementById("answer").focus();
-        }
-
-        function startTimer() {
-            clearInterval(timer); 
-            timeLeft = 5; 
-            document.getElementById("timer").textContent = timeLeft;
-
-            timer = setInterval(() => {
-                timeLeft--;
-                document.getElementById("timer").textContent = timeLeft;
-
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    handleGameOver();
-                }
-            }, 1000);
-        }
-
-        function checkAnswer() {
-            let userAnswer = parseInt(document.getElementById("answer").value);
-            if (userAnswer === (n1 + n2)) {
-                score++;
-                document.getElementById("score").textContent = score;
-                nextQuestion();
-                startTimer(); 
-            } else {
-                clearInterval(timer);
-                handleGameOver();
-            }
-        }
-
-        // --- 3. DATABASE CALLS ---
-        function handleGameOver() {
-            alert("Game over! Final Score: " + score);
-            
-            if (score > 0) {
-                let name = prompt("You made the board! Enter your name:");
-                if (name) {
-                    LootLocker.setPlayerName({ name: name }, (nameResponse) => {
-                        if (nameResponse.success) {
-                            LootLocker.submitScore({ leaderboardKey: LEADERBOARD_ID, score: score }, (submitResponse) => {
-                                fetchGlobalLeaderboard(); 
-                            });
-                        } else {
-                            LootLocker.submitScore({ leaderboardKey: LEADERBOARD_ID, score: score }, () => {
-                                fetchGlobalLeaderboard();
-                            });
-                        }
-                    });
-                }
-            }
-            
-            score = 0;
-            document.getElementById("score").textContent = score;
-            nextQuestion();
-            startTimer();
-        }
-
-        function fetchGlobalLeaderboard() {
-            LootLocker.getLeaderboard({ leaderboardKey: LEADERBOARD_ID, count: 10 }, (response) => {
-                const list = document.getElementById("leaderboard-list");
-                list.innerHTML = ""; 
-                
-                if (response.success && response.items && response.items.length > 0) {
-                    response.items.forEach(item => {
-                        let name = "Anonymous";
-                        if (item.player && item.player.name) {
-                            name = item.player.name;
-                        }
-                        
-                        let row = document.createElement("li");
-                        row.innerHTML = `<b>${name}</b> - ${item.score} pts`;
-                        list.appendChild(row);
-                    });
-                } else {
-                    list.innerHTML = "<li>No global high scores yet!</li>";
-                }
+// --- 3. DATABASE CALLS ---
+function handleGameOver() {
+    alert("Game over! Final Score: " + score);
+    
+    if (score > 0) {
+        let name = prompt("You made the board! Enter your name:");
+        if (name) {
+            LootLocker.setPlayerName({ name: name }, (nameResponse) => {
+                LootLocker.submitScore({ leaderboardKey: LEADERBOARD_ID, score: score }, (submitResponse) => {
+                    fetchGlobalLeaderboard(); 
+                });
             });
         }
+    }
+    
+    score = 0;
+    document.getElementById("score").textContent = score;
+    nextQuestion();
+    startTimer();
+}
+
+function fetchGlobalLeaderboard() {
+    LootLocker.getLeaderboard({ leaderboardKey: LEADERBOARD_ID, count: 10 }, (response) => {
+        const list = document.getElementById("leaderboard-list");
+        list.innerHTML = ""; 
+        
+        if (response.success && response.items && response.items.length > 0) {
+            response.items.forEach(item => {
+                let name = "Anonymous";
+                if (item.player && item.player.name) {
+                    name = item.player.name;
+                }
+                
+                let row = document.createElement("li");
+                row.innerHTML = `<b>${name}</b> - ${item.score} pts`;
+                list.appendChild(row);
+            });
+        } else {
+            list.innerHTML = "<li>No global high scores yet!</li>";
+        }
+    });
+}
     </script>
 </body>
 </html>
