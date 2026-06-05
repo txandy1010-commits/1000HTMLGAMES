@@ -3,22 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage</title>
+    <meta http-equiv="X-UA-Compatible" content="width=device-width, initial-scale=1.0">
+    <title>Retro Arcade Hub</title>
+    <style>
+        /* Matching Cookie Clicker Retro Styles */
+        body {
+            background-color: #111;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px #00ff66;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        #hub-container {
+            border: 4px dashed #00ff66;
+            background-color: #222;
+            padding: 40px;
+            display: inline-block;
+            border-radius: 15px;
+            box-shadow: 0 0 20px #00ff66;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        /* Arcade Menu Buttons styled like your game buttons */
+        .arcade-btn {
+            display: block;
+            background-color: #00ff66;
+            color: #000;
+            border: 2px solid #fff;
+            padding: 15px 30px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 15px auto;
+            width: 80%;
+            box-shadow: 0 4px 0 #00aa44;
+            transition: all 0.05s ease;
+        }
+
+        .arcade-btn:hover {
+            background-color: #fff;
+            color: #000;
+            box-shadow: 0 4px 0 #cccccc;
+        }
+
+        .arcade-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .log-link {
+            color: #00ffff;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .log-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
-<body style="text-align: center; font-family: sans-serif; margin-top: 50px; background-color: #f0f2f5;">
+<body>
 
-    <h1> 1000 HTML Games</h1>
-    <p>By: Andy</p>
+    <div id="hub-container">
+        <h1>1000 HTML games</h1>
+        <p> By: ANDY TURNER</p>
+        <p>SELECT A CHALLENGE TO BEGIN</p>
+        
+        <hr style="border: 1px solid #00ff66; margin: 20px 0;">
 
-    <hr style="width: 300px; margin: 30px auto;">
+        <a href="HTML GAMES.html" class="arcade-btn">COOKIE CLICKER</a>
+        <a href="SPEEDMATH.html" class="arcade-btn">SPEED MATH</a>
+        <a href="SECRET.html" class="arcade-btn">(SECRET GAME COMING SOON)</a>
 
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+        <hr style="border: 1px solid #00ff66; margin: 20px 0;">
 
-        <a href="SPEEDMATH.html" style="font-size: 20px; text-decoration: none; color: #0070f3; font-weight: bold;">Speed Math</a>
-        <a href="HTML GAMES.html" style="font-size: 20px; text-decoration: none; color: #0070f3; font-weight: bold;">Cookie Clicker</a>
-        <a href="Update Logs.html" style="font-size: 20px; text-decoration: none; color: #0070f3; font-weight: bold;">Update Logs</a>
-
+        <a href="UpdateLogs.html" class="log-link">[ VIEW UPDATE LOGS ]</a>
     </div>
 
-    <hr style="width: 300px; margin: 30px auto;">
-    <p style="color: gray; font-size: 14px;">UPDATES DAILY!</p>
+</body>
+</html>

@@ -2,34 +2,135 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="width=device-width, initial-scale=1.0">
     <title>Global Speed Math Arcade</title>
+    <style>
+        /* Retro Arcade Terminal Theme */
+        body {
+            background-color: #111;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .nav-container {
+            margin-bottom: 20px;
+        }
+
+        a {
+            color: #00ffff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #game-container {
+            border: 4px dashed #00ff66;
+            background-color: #222;
+            padding: 30px;
+            display: inline-block;
+            border-radius: 15px;
+            box-shadow: 0 0 15px #00ff66;
+            max-width: 450px;
+            width: 90%;
+        }
+
+        button {
+            background-color: #00ff66;
+            color: #000;
+            border: 2px solid #fff;
+            padding: 8px 16px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+        input {
+            background-color: #000;
+            color: #00ff66;
+            border: 2px solid #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 24px;
+            width: 100px;
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        #leaderboard-box {
+            max-width: 320px;
+            margin: 20px auto 0 auto;
+            text-align: left;
+            border: 2px solid #00ff66;
+            background-color: #000;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        #leaderboard-box h3 {
+            text-align: center;
+            margin-top: 0;
+            color: #ffff00;
+        }
+
+        ul, ol {
+            color: #fff;
+            padding-left: 25px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+    </style>
 </head>
-<body style="text-align: center; font-family: sans-serif; margin-top: 30px;">
+<body>
 
-    <a href="Homepage.html">&larr; Back Home</a>
-    <h2>Global Speed Math</h2>
-
-    <div>
-        <button onclick="setDifficulty(10)">Easy</button>
-        <button onclick="setDifficulty(50)">Medium</button>
-        <button onclick="setDifficulty(100)">Hard</button>
+    <div class="nav-container">
+        <a href="index.html">&larr; Back Home</a>
     </div>
 
-    <p style="color: red; font-weight: bold; font-size: 24px;">Time Left: <span id="timer">5</span>s</p>
-    <h1><span id="num1">5</span> + <span id="num2">7</span> = ?</h1>
+    <div id="game-container">
+        <h2>SPEED MATH</h2>
 
-    <input type="number" id="answer" style="font-size: 20px; width: 80px; text-align: center;">
-    <button onclick="checkAnswer()" style="font-size: 20px;">Go</button>
+        <div>
+            <button onclick="setDifficulty(10)">Easy</button>
+            <button onclick="setDifficulty(50)">Medium</button>
+            <button onclick="setDifficulty(100)">Hard</button>
+        </div>
 
-    <p style="font-size: 18px; font-weight: bold;">Your Current Score: <span id="score">0</span></p>
-    
-    <hr style="width: 300px; margin: 20px auto;">
-    
-    <div style="max-width: 300px; margin: 0 auto; text-align: left; border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
-        <h3 style="text-align: center; margin-top: 0;">🌐 Global Top 10 Leaderboard</h3>
-        <ol id="leaderboard-list">
-            <li>Loading global scores...</li>
-        </ol>
+        <p style="color: #ff3333; font-weight: bold; font-size: 24px; text-shadow: 0 0 5px #ff3333;">
+            Time Left: <span id="timer">5</span>s
+        </p>
+        
+        <h1 style="font-size: 2.5rem; text-shadow: 0 0 10px #00ff66;">
+            <span id="num1">5</span> + <span id="num2">7</span> = ?
+        </h1>
+
+        <input type="number" id="answer" autocomplete="off" onkeydown="if(event.key==='Enter') checkAnswer();">
+        <button onclick="checkAnswer()" style="font-size: 20px; padding: 7px 20px;">Go</button>
+
+        <p style="font-size: 18px; font-weight: bold; color: #fff;">Your Current Score: <span id="score">0</span></p>
+        
+        <hr style="border: 1px dashed #00ff66; margin: 20px auto;">
+        
+        <div id="leaderboard-box">
+            <h3>🌐 Global Top 10</h3>
+            <ol id="leaderboard-list">
+                <li>Loading global scores...</li>
+            </ol>
+        </div>
     </div>
 
     <script src="https://unpkg.com/lootlocker-js-sdk/dist/lootlocker.js"></script>
@@ -41,7 +142,7 @@
 
         let n1, n2, score = 0, timeLeft = 5, timer, maxRange = 10;
 
-        // FIX 1: Properly pass an empty identifier string for guest sessions to kick off tracking
+        // Initialize connection to database
         LootLocker.initialize(GAME_API_KEY, "0.0.0.1", "development");
         
         LootLocker.startGuestSession("", (response) => {
@@ -71,6 +172,7 @@
             document.getElementById("num1").textContent = n1;
             document.getElementById("num2").textContent = n2;
             document.getElementById("answer").value = ""; 
+            document.getElementById("answer").focus();
         }
 
         function startTimer() {
@@ -109,15 +211,12 @@
             if (score > 0) {
                 let name = prompt("You made the board! Enter your name:");
                 if (name) {
-                    // FIX 2: Correct function structure for updating player profile names
                     LootLocker.setPlayerName({ name: name }, (nameResponse) => {
                         if (nameResponse.success) {
-                            // FIX 3: Submitting scores to LootLocker requires formatting parameters inside an object structure
                             LootLocker.submitScore({ leaderboardKey: LEADERBOARD_ID, score: score }, (submitResponse) => {
-                                fetchGlobalLeaderboard(); // Update display
+                                fetchGlobalLeaderboard(); 
                             });
                         } else {
-                            // Fallback score submission if name setup experiences lag
                             LootLocker.submitScore({ leaderboardKey: LEADERBOARD_ID, score: score }, () => {
                                 fetchGlobalLeaderboard();
                             });
@@ -133,14 +232,12 @@
         }
 
         function fetchGlobalLeaderboard() {
-            // FIX 4: Getting rankings requires passing parameters cleanly as a collection item
             LootLocker.getLeaderboard({ leaderboardKey: LEADERBOARD_ID, count: 10 }, (response) => {
                 const list = document.getElementById("leaderboard-list");
                 list.innerHTML = ""; 
                 
                 if (response.success && response.items && response.items.length > 0) {
                     response.items.forEach(item => {
-                        // Check if player details or names exist on the database records
                         let name = "Anonymous";
                         if (item.player && item.player.name) {
                             name = item.player.name;
