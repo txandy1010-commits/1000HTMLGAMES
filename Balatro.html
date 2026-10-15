@@ -64,13 +64,7 @@
 </head>
 <body>
 
-  <div class="container" id="gameContainer">
-    <!-- Click overlay to satisfy browser user-gesture requirements for Pointer Lock -->
-    <div class="overlay" id="clickOverlay">
-      <h1>Click Anywhere to Play</h1>
-      <p>Enables Pointer Lock / Mouse Control</p>
-    </div>
-
+  
     <!-- Embedded website with permission attributes allowing pointer-lock -->
     <iframe 
       id="gameFrame"
@@ -82,7 +76,7 @@
   </div>
 
   <script>
-    const overlay = document.getElementById('clickOverlay');
+    
     const iframe = document.getElementById('gameFrame');
 
     overlay.addEventListener('click', () => {
