@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between items-center p-4 sm:p-6">
+
+    <!-- Top Header -->
+    <header class="w-full max-w-md text-center pt-6 pb-2">
+        <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">Proxy</h1>
+        <span class="inline-block bg-amber-500/10 text-amber-300 border border-amber-500/20 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+            If blocked keep cycling
+        </span>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="w-full max-w-md my-auto">
+        <!-- Active Link State Card -->
+        <div id="activeCard" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-sm text-center">
+            <!-- Counter Header -->
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono mb-6 pb-3 border-b border-slate-800/80">
+                <span class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Link Status
+                </span>
+                <span id="counterText" class="bg-slate-800 px-2.5 py-1 rounded-md text-slate-300 font-bold">Link 1 of 12</span>
+            </div>
+
+            <!-- Prominent Link Button -->
+            <div class="mb-8">
+                <p class="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-3">Click to open site</p>
+                <a id="currentUrlBtn" href="#" target="_blank" rel="noopener noreferrer" 
+                   class="group flex items-center justify-between w-full bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white font-bold py-4 px-5 rounded-xl transition duration-150 shadow-lg shadow-indigo-600/20 border border-indigo-400/30">
+                    <span id="currentUrlText" class="truncate font-mono text-sm sm:text-base mr-2">https://godfreyfirst.org/</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-indigo-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0"></i>
+                </a>
+            </div>
+
+            <!-- "It's Blocked" Action Button -->
+            <button onclick="markBlocked()" 
+                    class="w-full bg-slate-800 hover:bg-rose-950/40 hover:border-rose-500/50 hover:text-rose-300 text-slate-200 font-semibold py-3.5 px-4 rounded-xl border border-slate-700 transition duration-150 flex items-center justify-center gap-2 group shadow-md active:scale-[0.98]">
+                <i class="fa-solid fa-ban text-rose-400 group-hover:scale-110 transition-transform"></i>
+                <span>It's Blocked - Try Next Link</span>
+            </button>
+        </div>
+
+        <!-- All Blocked End Card (Hidden initially) -->
+        <div id="allBlockedCard" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center">
+            <div class="w-16 h-16 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            
+            <h2 class="text-xl font-bold text-white mb-2">All Links Tried</h2>
+            <p class="text-slate-300 font-medium text-base mb-6 bg-slate-800/60 py-3 px-4 rounded-xl border border-slate-700/50">
+                I'm updating links every month
+            </p>
+
+            <button onclick="resetLinks()" 
+                    class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-3 px-4 rounded-xl border border-slate-700 transition duration-150 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-right text-indigo-400"></i>
+                <span>Start Over / Try Again</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- Simple Footer -->
+    <footer class="w-full max-w-md text-center py-4 text-xs text-slate-500">
+        Proxy Link Switcher
+    </footer>
+
+    <script>
+        // Array of predefined links
+        const urls = [
+            "https://godfreyfirst.org/",
+            "https://brennaquillenphotography.com/",
+            "https://impact-lacrosse.com/",
+            "https://logiscolbert.com/",
+            "https://mkmshoes.com/",
+            "https://coblossoms.com/",
+            "https://jfkcharterschool.com/",
+            "https://godfreyfirst.org/",
+            "https://hemalimos.com/",
+            "https://justinhurleyphotography.com/",
+            "https://crowsnestrest.com/",
+            "https://cybersecurityguides.org/"
+        ];
+
+        let currentIndex = 0;
+
+        const activeCard = document.getElementById('activeCard');
+        const allBlockedCard = document.getElementById('allBlockedCard');
+        const counterText = document.getElementById('counterText');
+        const currentUrlBtn = document.getElementById('currentUrlBtn');
+        const currentUrlText = document.getElementById('currentUrlText');
+
+        function updateUI() {
+            if (currentIndex < urls.length) {
+                // Show active link card, hide end card
+                activeCard.classList.remove('hidden');
+                allBlockedCard.classList.add('hidden');
+
+                // Update text and link target
+                const currentUrl = urls[currentIndex];
+                currentUrlText.textContent = currentUrl;
+                currentUrlBtn.href = currentUrl;
+                counterText.textContent = `Link ${currentIndex + 1} of ${urls.length}`;
+            } else {
+                // Hide link card, show "I'm updating links every month" message
+                activeCard.classList.add('hidden');
+                allBlockedCard.classList.remove('hidden');
+            }
+        }
+
+        function markBlocked() {
+            currentIndex++;
+            updateUI();
+        }
+
+        function resetLinks() {
+            currentIndex = 0;
+            updateUI();
+        }
+
+        // Initial setup
+        updateUI();
+    </script>
+</body>
+</html>
